@@ -1,5 +1,5 @@
 module regis32(input logic [31:0] din, input clk, rst, output logic [31:0] q);
-always_ff @(posedge clk or posedge rst) begin
+always_ff @(posedge clk) begin
  	if(rst) begin
 		q <= 32'b0;
 	end
