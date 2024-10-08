@@ -5,4 +5,4 @@ reg [31:0] mem [1023:0];
 always_ff @(posedge clk) begin
 	dout <= mem[ addr[31:0]];
 end 
-end module
+endmodule
