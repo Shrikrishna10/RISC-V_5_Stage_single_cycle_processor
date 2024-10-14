@@ -1,15 +1,15 @@
-module adder_tb;
+module adderpcnooffset_tb;
     // Parameters
     parameter WIDTH = 32;
 
     // Testbench signals
-    logic [WIDTH-1:0] a, b;  // Inputs a and b
+    logic [WIDTH-1:0] a; b;  // Inputs a and b
     logic cin;               // Carry-in
     logic [WIDTH-1:0] sum;   // Output sum
     logic cout;              // Carry-out
 
     // Instantiate the parameterized CLA adder
-    param_cla_adder #(.WIDTH(WIDTH)) uut (
+    param_adder #(.WIDTH(WIDTH)) uut (
         .a(a),
         .b(b),
         .cin(cin),
