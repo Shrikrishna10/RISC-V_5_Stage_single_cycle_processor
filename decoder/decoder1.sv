@@ -1,34 +1,60 @@
-module riscv_decoder (
-    input  logic [31:0] instr,    // 32-bit instruction
-    output logic [6:0]  opcode,   // Opcode
-    output logic [4:0]  rd,       // Destination register (for R/I-type)
-    output logic [2:0]  funct3,   // Function3 code
-    output logic [4:0]  rs1,      // Source register 1
-    output logic [4:0]  rs2,      // Source register 2 (for R/S-type)
-    output logic [6:0]  funct7,   // Function7 code (for R-type)
-    output logic [31:0] imm       // Immediate value (for I/S-type)
+module decoder (
+	input	logic[31:0] instruction,
+  	output	logic[4:0]  rs1,
+  	output	logic[4:0]  rs2,
+  	output	logic[4:0]  rd,
+  	output 	logic[6:0]  opcode,
+  	output	logic[2:0]  funct3,
+	output	logic[6:0]  funct7,
+	output  logic[11:0] i_type_imm,
+  	output  logic[11:0] s_type_imm,
+  	output  logic[11:0] b_type_imm,
+  	output  logic[19:0] u_type_imm,
+  	output  logic[19:0] j_type_imm
 );
 
-    // Extracting opcode
-    assign opcode = instr[6:0];
-
-    // R-type Instruction: Extract relevant fields
-    assign rd     = instr[11:7];   // Destination register
-    assign funct3 = instr[14:12];  // Function code 3
-    assign rs1    = instr[19:15];  // Source register 1
-    assign rs2    = instr[24:20];  // Source register 2 (for R and S-type)
-    assign funct7 = instr[31:25];  // Function code 7 (for R-type)
-
-    // Decoding immediate value based on the instruction type
-    always_comb begin
-        case(opcode)
-            7'b0010011: // I-type (e.g., ADDI, SLTI, ORI)
-                imm = {{20{instr[31]}}, instr[31:20]}; // Sign-extended immediate
-            7'b0100011: // S-type (e.g., SW, SH, SB)
-                imm = {{20{instr[31]}}, instr[31:25], instr[11:7]}; // Sign-extended immediate
-            default:
-                imm = 32'b0;
-        endcase
-    end
-
+	always_comb
+   	begin
+      	case(instruction[6:0])
+         	7'b0110011 : begin 			// R-Format Instructions 
+			rs1 = instruction[19:15];
+                        rs2 = instruction[24:20];
+                        rd = instruction[11:7];   
+                        funct3 = instruction[14:12];
+                        funct7 = instruction[31:25];
+                        opcode = instruction[6:0]; 
+		end 
+         	7'b0010011 : begin			// I-Format Instructions
+			rs1 = instruction[19:15];
+                        funct3 = instruction[14:12];
+                        rd = instruction[11:7];
+                        i_type_imm = instruction[31:20];
+                        opcode = instruction[6:0]; 
+		end
+         	7'b0100011 : begin			// S-Format Instructions
+			rs2 = instruction[24:20];
+                        rs1 = instruction[19:15];
+                        funct3 = instruction[14:12];
+                        s_type_imm = {instruction[31:25],instruction[11:7]};
+                        opcode = instruction[6:0];
+		end
+         	7'b1100111 : begin			// SB-Format Instructions  
+			funct3 = instruction[14:12];
+                        rs1 = instruction[19:15];
+                        rs2 = instruction[24:20];
+                        b_type_imm = {instruction[31],instruction[7],instruction[30:25]};
+                        opcode = instruction[6:0]; 
+		end
+         	7'b1101111 : begin			// U-Format Instructions
+			rd = instruction[11:7];
+                        u_type_imm = {instruction[31],instruction[19:12],instruction[20],instruction[30:21]};
+                        opcode = instruction[6:0]; 
+		end
+         	7'b0110111 : begin			// UJ-Format Instructions
+			rd = instruction[11:7];
+                        j_type_imm = instruction[31:12];
+                        opcode = instruction[6:0]; 
+		end
+      	endcase
+   	end
 endmodule
